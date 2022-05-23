@@ -11,6 +11,10 @@ class Pendulum:
         self.end = new_node
         self.start.max_force()
         self.start.force()
+    def elapse(self, dt):
+        self.start.force()
+        self.start.elapse(dt)
+        self.end.coords()
         
 class Node:
     #Update values
@@ -29,6 +33,12 @@ class Node:
             self.f = [self.m * g * math.sin(self.x-math.pi) + self.n[1].f[0] * math.cos(self.n[1].x-self.x), self.m * g * math.cos(self.x-math.pi) + self.n[1].f[0] * math.sin(self.n[1].x-self.x)]
         else:
             self.f = [self.m * g * math.sin(self.x-math.pi), self.m * g * math.cos(self.x-math.pi)]
+    def elapse(self, dt):
+        if (self.n[1] != None):
+            a = self.f[1] / (self.m * self.p[0]) if self.p[0] != 0 else 0
+            self.v += a * dt
+            self.x += self.v * dt
+            self.n[1].elapse(dt)
 
     
     def __init__(self, mass, length, previous = None):
