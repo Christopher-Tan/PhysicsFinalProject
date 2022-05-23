@@ -54,7 +54,7 @@ class Node:
     def __init__(self, mass, length, previous = None):
         self.m = mass
         #Angular
-        self.x = random.random()
+        self.x = 0
         self.v = 0
         self.f_max = mass * g
         #Link
@@ -67,15 +67,3 @@ class Node:
         self.f = [0,0] #Normal, Tangential
 
 a = Pendulum()
-a.add_node(1,1)
-a.add_node(1,1)
-while (True):
-    a.elapse(0.1)
-    x = [i[0] for i in a.coords()]
-    y = [i[1] for i in a.coords()]
-    #print(x,y)
-    #print()
-    plt.xlim(-2,2)
-    plt.ylim(-2,2)
-    plt.plot(x, y, marker="o", markersize=20)
-    plt.show()
