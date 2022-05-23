@@ -1,4 +1,7 @@
 import math
+import time
+import matplotlib.pyplot as plt
+import random
 #Constants
 g = 10
 class Pendulum:
@@ -15,6 +18,13 @@ class Pendulum:
         self.start.force()
         self.start.elapse(dt)
         self.end.coords()
+    def coords(self):
+        i = self.start
+        c = []
+        while (i != None):
+            c.append(i.c)
+            i = i.n[1]
+        return c
         
 class Node:
     #Update values
@@ -34,17 +44,17 @@ class Node:
         else:
             self.f = [self.m * g * math.sin(self.x-math.pi), self.m * g * math.cos(self.x-math.pi)]
     def elapse(self, dt):
+        a = self.f[1] / (self.m * self.p[0]) if self.p[0] != 0 else 0
+        self.v += a * dt
+        self.x += self.v * dt
         if (self.n[1] != None):
-            a = self.f[1] / (self.m * self.p[0]) if self.p[0] != 0 else 0
-            self.v += a * dt
-            self.x += self.v * dt
             self.n[1].elapse(dt)
 
     
     def __init__(self, mass, length, previous = None):
         self.m = mass
         #Angular
-        self.x = 0
+        self.x = random.random()
         self.v = 0
         self.f_max = mass * g
         #Link
@@ -57,3 +67,15 @@ class Node:
         self.f = [0,0] #Normal, Tangential
 
 a = Pendulum()
+a.add_node(1,1)
+a.add_node(1,1)
+while (True):
+    a.elapse(0.1)
+    x = [i[0] for i in a.coords()]
+    y = [i[1] for i in a.coords()]
+    #print(x,y)
+    #print()
+    plt.xlim(-2,2)
+    plt.ylim(-2,2)
+    plt.plot(x, y, marker="o", markersize=20)
+    plt.show()
