@@ -44,12 +44,16 @@ class Node:
         else:
             self.f = [self.m * g * math.sin(self.x-math.pi), self.m * g * math.cos(self.x-math.pi)]
     def elapse(self, dt):
-        a = self.f[1] / (self.m * self.p[0]) if self.p[0] != 0 else 0
+        a = 2 * self.f[1] / (self.m * self.p[0]) if self.p[0] != 0 else 0
+        b = a
+        try:
+            a -= 2 * self.p[1].f[1] * math.cos(self.p[1].x-self.x) / (self.p[1].m * self.p[0])
+        except:
+            a = b
         self.v += a * dt
         self.x += self.v * dt
         if (self.n[1] != None):
             self.n[1].elapse(dt)
-
     
     def __init__(self, mass, length, previous = None):
         self.m = mass
@@ -67,3 +71,17 @@ class Node:
         self.f = [0,0] #Normal, Tangential
 
 a = Pendulum()
+a.add_node(1,1)
+a.add_node(1,1)
+a.add_node(1,1)
+a.add_node(1,1)
+
+while (True):
+    a.elapse(0.01)
+    x = [i[0] for i in a.coords()]
+    y = [i[1] for i in a.coords()]
+    plt.subplots()[0].canvas.draw()
+    plt.xlim(-5,5)
+    plt.ylim(-5,5)
+    plt.plot(x, y, marker="o", markersize=20)
+    plt.show()
