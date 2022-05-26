@@ -2,6 +2,11 @@ import math
 import time
 import matplotlib.pyplot as plt
 import random
+
+def sum(v1,v2):
+    x = v1[0] * math.cos(v1[1]) + v2[0] * math.cos(v2[1])
+    y = v1[0] * math.sin(v1[1]) + v2[0] * math.sin(v2[1])
+    return [math.sqrt(x ** 2 + y ** 2), math.atan2(y, x)] #magnitude, angle
 #Constants
 g = 10
 class Pendulum:
@@ -16,6 +21,7 @@ class Pendulum:
         self.start.force()
     def elapse(self, dt):
         self.start.force()
+        self.end.acceleration()
         self.start.elapse(dt)
         self.end.coords()
     def coords(self):
@@ -43,11 +49,25 @@ class Node:
             self.f = [self.m * g * math.sin(self.x-math.pi) + self.n[1].f[0] * math.cos(self.n[1].x-self.x), self.m * g * math.cos(self.x-math.pi) + self.n[1].f[0] * math.sin(self.n[1].x-self.x)]
         else:
             self.f = [self.m * g * math.sin(self.x-math.pi), self.m * g * math.cos(self.x-math.pi)]
+    def acceleration(self):
+        if (self.p[1] != None):
+            self.p[1].acceleration()
+            try:
+                self.a = sum(self.p[1].a,[self.f[1]/self.m * math.sin(self.n[1].x-self.x), self.n[1].x])
+            except:
+                self.a = [0,0]
+        else:
+            self.a = [0,0]
     def elapse(self, dt):
-        a = 2 * self.f[1] / (self.m * self.p[0]) if self.p[0] != 0 else 0
+        if (self.p[1] == None):
+            a = 0
+        elif (self.p[1].m == 0):
+            a = (self.f[1] / self.m) / self.p[0]
+        else:
+            a = (self.f[1] / self.m) / (self.p[0] * (1 - (1 / ((self.p[1].m/self.m) + 1))))
         b = a
         try:
-            a -= 2 * self.p[1].f[1] * math.cos(self.p[1].x-self.x) / (self.p[1].m * self.p[0])
+            a += self.p[1].a[0] * math.cos(self.p[1].a[1] - self.x - 90) / (self.p[0] / ((self.p[1].m/self.m) + 1))
         except:
             a = b
         self.v += a * dt
@@ -58,13 +78,14 @@ class Node:
     def __init__(self, mass, length, previous = None):
         self.m = mass
         #Angular
-        self.x = 0
+        self.x = random.random()
         self.v = 0
         self.f_max = mass * g
         #Link
         self.p = [length, previous]
         self.n = [0, None]
         #Cartesian
+        self.a = [0,0] #Not relative
         self.c = [0,0]
         self.coords()
         #Forces
@@ -74,10 +95,11 @@ a = Pendulum()
 a.add_node(1,1)
 a.add_node(1,1)
 a.add_node(1,1)
-a.add_node(1,1)
-
+#a.add_node(1,1)
 while (True):
     a.elapse(0.01)
+    print(a.start.n[1].a)
+
     x = [i[0] for i in a.coords()]
     y = [i[1] for i in a.coords()]
     plt.subplots()[0].canvas.draw()
