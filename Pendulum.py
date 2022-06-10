@@ -6,96 +6,75 @@ import random
 
 #Constants
 g = 10
-class Pendulum:
-    def __init__(self):
-        self.start = Node(0,0)
-        self.end = self.start
-    def add_node(self, mass, length):
-        new_node = Node(mass, length, self.end)
-        self.end.n = length, new_node
-        self.end = new_node
-        self.start.max_force()
-        self.start.force()
-    def elapse(self, dt):
-        s = self.end
-        while (s != None):
-            self.start.force()
-            s.elapse(dt)
-            s = s.p[1]
-        self.end.coords()
-    def coords(self):
-        i = self.start
-        c = []
-        while (i != None):
-            c.append(i.c)
-            i = i.n[1]
+def f(array):
+    if (len(array) == 2):
+        m1 = array[0][0]
+        m2 = array[1][0]
+        l1 = array[0][1]
+        l2 = array[1][1]
+        t1 = array[0][2]
+        t2 = array[1][2]
+        w1 = array[0][3]
+        w2 = array[1][3]
+        f1 = (-l2 * (m2) * (w2 ** 2) * math.sin(t1 - t2) - g * math.sin(t1)) / l1
+        f2 = (l1 * (w1 ** 2) * math.sin(t1 - t2) - g * math.sin(t2)) / l2
+        a1 = l2 * m2 * math.cos(t1 - t2) / (l1 * (m1 + m2))
+        a2 = l1 * math.cos(t1 - t2) / l2
+        return [w1, w2, (f1 - a1 * f2) / (1 - a1 * a2), (f2 - a2 * f1) / (1 - a1 * a2)]
+
+class Pendulum():
+    def __init__(s):
+        s.nodes = []        
+    def add_node(s):
+        s.nodes.append([1, 1, math.pi / 2, 0]) #mass, length, theta, omega
+    def remove_node(s):
+        s.nodes.pop()
+    def elapse(s, dt):
+        ms = s.nodes.copy()
+        a = f(ms)
+        ms = s.nodes.copy()
+        ms[0][2] += a[0] * (dt / 2)
+        ms[1][2] += a[1] * (dt / 2)
+        ms[0][3] += a[2] * (dt / 2)
+        ms[1][3] += a[3] * (dt / 2)
+        b = f(ms)
+        ms = s.nodes.copy()
+        ms[0][2] += b[0] * (dt / 2)
+        ms[1][2] += b[1] * (dt / 2)
+        ms[0][3] += b[2] * (dt / 2)
+        ms[1][3] += b[3] * (dt / 2)
+        c = f(ms)
+        ms = s.nodes.copy()
+        ms[0][2] += c[0] * dt
+        ms[1][2] += c[1] * dt
+        ms[0][3] += c[2] * dt
+        ms[1][3] += c[3] * dt
+        d = f(ms)
+        s.nodes[0][2] += (dt / 6) * (a[0] + 2 * b[0] + 2 * c[0] + d[0])
+        s.nodes[1][2] += (dt / 6) * (a[1] + 2 * b[1] + 2 * c[1] + d[1])
+        s.nodes[0][3] += (dt / 6) * (a[2] + 2 * b[2] + 2 * c[2] + d[2])
+        s.nodes[1][3] += (dt / 6) * (a[3] + 2 * b[3] + 2 * c[3] + d[3])
+    def coords(s):
+        c = [[0, 0]]
+        for i in range(len(s.nodes)):
+            x = 0
+            y = 0
+            for j in range(i+1):
+                x += s.nodes[j][1] * math.sin(s.nodes[j][2])
+                y -= s.nodes[j][1] * math.cos(s.nodes[j][2])
+            c.append([x, y])
         return c
-    def energy(self):
-      e = 0
-      s = self.start
-      while (s != None):
-        e += 0.5 * s.m * (s.v ** 2) + s.m * g * s.c[1]
-        s = s.n[1]
-      return e
-       
-class Node:
-    #Update values
-    def coords(self):
-        if (self.p[1] != None):
-            self.p[1].coords()
-            self.c[0] = self.p[1].c[0] + self.p[0] * math.cos(self.x)
-            self.c[1] = self.p[1].c[1] + self.p[0] * math.sin(self.x)
-    def max_force(self):
-        if (self.n[1] != None):
-            self.n[1].max_force()
-            self.f_max = self.n[1].f_max + self.m * g
-    def force(self):
-        if (self.n[1] != None):
-            self.n[1].force()
-            self.f = [self.m * g * math.sin(self.x-math.pi) + self.n[1].f[0] * math.cos(self.n[1].x-self.x), self.m * g * math.cos(self.x-math.pi) + self.n[1].f[0] * math.sin(self.n[1].x-self.x)]
-        else:
-            self.f = [self.m * g * math.sin(self.x-math.pi), self.m * g * math.cos(self.x-math.pi)]
-    def elapse(self, dt):
-        try:
-            a1 = self.f[1] / self.m / self.p[0]
-            self.v += a1 * dt
-            self.x += self.v * dt
-        except:
-            pass
-        try:
-            a2 = self.f[1] * math.cos(self.n[1].x - self.x) / self.m / self.n[0]
-            self.n[1].v -= a2 * dt
-            self.n[1].x += self.n[1].v * dt
-        except:
-            pass
 
-   
-    def __init__(self, mass, length, previous = None):
-        self.m = mass
-        #Angular
-        self.x = (random.random() - 0.5)/10
-        self.v = 0
-        self.f_max = mass * g
-        #Link
-        self.p = [length, previous]
-        self.n = [0, None]
-        #Cartesian
-        self.c = [0,0]
-        self.coords()
-        #Forces
-        self.f = [0,0] #Normal, Tangential
-a = [Pendulum() for i in range(1)]
-
-for i in a:
-    i.add_node(1,1)
-    i.add_node(1,1)
-    i.add_node(1,1)
+p = [Pendulum() for i in range(2)]
+for i in p:
+    i.add_node()
+    i.add_node()
 
 fig = plt.figure()
 
 def animate(i):
     plt.cla()
-    for i in a:
+    for i in p:
         i.elapse(0.01)
         x = [j[0] for j in i.coords()]
         y = [j[1] for j in i.coords()]
