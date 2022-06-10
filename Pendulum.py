@@ -16,11 +16,8 @@ def f(array):
         t2 = array[1][2]
         w1 = array[0][3]
         w2 = array[1][3]
-        f1 = (-l2 * (m2) * (w2 ** 2) * math.sin(t1 - t2) - g * math.sin(t1)) / l1
-        f2 = (l1 * (w1 ** 2) * math.sin(t1 - t2) - g * math.sin(t2)) / l2
-        a1 = l2 * m2 * math.cos(t1 - t2) / (l1 * (m1 + m2))
-        a2 = l1 * math.cos(t1 - t2) / l2
-        return [w1, w2, (f1 - a1 * f2) / (1 - a1 * a2), (f2 - a2 * f1) / (1 - a1 * a2)]
+        return [w1, w2, (-g * (2 * m1 + m2) * math.sin(t1) - m2 * g * math.sin(t1 - 2 * t2) - 2 * math.sin(t1 - t2) * m2 * ((w2 ** 2) * l2 + (w1 ** 2) * l1 * math.cos(t1 - t2))) / (l1 * (2 * m1 + m2 - m2 * math.cos(2 * t1 - 2 * t2))), (2 * math.sin(t1 - t2) * ((w1 ** 2) * l1 * (m1 + m2) + g * (m1 + m2) * math.cos(t1) + (w2 ** 2) * l2 * m2 * math.cos(t1 - t2))) / (l2 * (2 * m1 + m2 - m2 * math.cos(2 * t1 - 2 * t2)))]
+        
 
 class Pendulum():
     def __init__(s):
