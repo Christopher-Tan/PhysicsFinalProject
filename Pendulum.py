@@ -6,6 +6,7 @@ while True:
     import random
     import copy
     from matplotlib.widgets import Slider, Button
+    from scipy.linalg import lu_solve, lu_factor
 
     #Constants
     end = False
@@ -25,6 +26,29 @@ while True:
             a1 = l2 * m2 * math.cos(t1 - t2) / (l1 * (m1 + m2))
             a2 = l1 * math.cos(t1 - t2) / l2
             return [w1, w2, (f1 - a1 * f2) / (1 - a1 * a2), (f2 - a2 * f1) / (1 - a1 * a2)]
+        else:
+            M = []
+            n = len(array)
+            for i in range(n):
+                row = []
+                for j in range(n):
+                    row.append((n - max(i, j)) * math.cos(array[i][2] - array[j][2]))
+                M.append(row)
+            v = []
+            for i in range(n):
+                b = 0
+                for j in range(n):
+                    b -= (n - max(i, j)) * math.sin(array[i][2] - array[j][2]) * array[j][3]
+                b -= g * (n - i) * math.sin(array[i][2])
+                v.append(b)
+            r = []
+            for i in range(n):
+                r.append(array[i][3])
+            a = lu_solve(lu_factor(M), v, 0)
+            for i in range(n):
+                r.append(a[i])
+            return r
+                
 
 
     class Pendulum():
@@ -108,6 +132,9 @@ while True:
         s = not s
         h = False
         c = None
+        if len(sp.nodes) != 2:
+            for i in sp.nodes:
+                i[1] = 1
         if s:
             p = [copy.deepcopy(sp) for i in range(spendulum.val)]
             for i in p:
@@ -157,12 +184,16 @@ while True:
                 ax[0].cla()
                 ax[0].set_axis_off()
                 ax[0].text(0, 0.9, "To reset the simulation at any time, close the window.")
-                ax[0].text(0, 0.85, "The pendulum mass and length are only adjustable for a double pendulum.")
-                ax[0].text(0, 0.8, "It might seem that for non-double pendulums you can adjust the length,")
-                ax[0].text(0, 0.75, "but it will be reset to one upon starting the simulation.")
-                ax[0].text(0, 0.7, "Click the node to pick up and place it.")
-                ax[0].text(0, 0.65, "Please do not try to purposely break the simulation by moving the mouse eratically,")
-                ax[0].text(0, 0.60, "etc.")
+                ax[0].text(0, 0.80, "The pendulum mass and length are only adjustable for a double pendulum.")
+                ax[0].text(0, 0.75, "It might seem that non-double pendulums also have adjustable lengths, but they")
+                ax[0].text(0, 0.70, "will be reset to one upon starting the simulation.")
+                ax[0].text(0, 0.6, "Click the node to pick up and place it.")
+                ax[0].text(0, 0.50, "Please do not try to purposely break the simulation by moving the mouse eratically,")
+                ax[0].text(0, 0.45, "etc.")
+                ax[0].text(0, 0.35, "Once starting the simulation, you cannot pause or re-alter anything.")
+                ax[0].text(0, 0.25, "Note: the Runge Kutta 4 method has a relatively minimal error compared to Euler's")
+                ax[0].text(0, 0.2, "method, however, over time the error equally builds up and the simulation becomes")
+                ax[0].text(0, 0.15, "less accurate: energy won't be conserved and the pendulum might move incorrectly.")
         else:
             ax[0].cla()
             for i in p:
