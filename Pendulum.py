@@ -38,7 +38,7 @@ while True:
             for i in range(n):
                 b = 0
                 for j in range(n):
-                    b -= (n - max(i, j)) * math.sin(array[i][2] - array[j][2]) * array[j][3]
+                    b -= (n - max(i, j)) * math.sin(array[i][2] - array[j][2]) * array[j][3] ** 2
                 b -= g * (n - i) * math.sin(array[i][2])
                 v.append(b)
             r = []
