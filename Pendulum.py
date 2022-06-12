@@ -1,15 +1,19 @@
 import math
+from re import T
 import time
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
 import copy
-from matplotlib.widgets import Button
+from matplotlib.widgets import Slider, Button
 
 #Constants
 g = 10
 n = 50
+i = 0
 h = False
+s = False
+c = None
 def f(array):
     if (len(array) == 2):
         m1 = array[0][0]
@@ -28,10 +32,11 @@ def f(array):
 
 
 class Pendulum():
+    global i
     def __init__(s):
-        s.nodes = []        
-    def add_node(s, i):
-        s.nodes.append([1, 2, 3 * math.pi / 2 + (i / n - 0.5) / 100, 0]) #mass, length, theta, omega
+        s.nodes = []
+    def add_node(s):
+        s.nodes.append([1, 1, (i / n - 0.5) / 100, 0]) #mass, length, theta, omega
     def remove_node(s):
         s.nodes.pop()
     def elapse(s, dt):
@@ -61,18 +66,91 @@ class Pendulum():
                 y -= s.nodes[j][1] * math.cos(s.nodes[j][2])
             c.append([x, y])
         return c
+sp = Pendulum()
+def onclick(event):
+    global c, sp
+    if (c != None):
+        c = None
+    else:
+        coords = sp.coords()
+        x = event.xdata
+        y = event.ydata
+        closest = 0, math.inf
+        for i in range(1,len(coords)):
+            if ((x - coords[i][0]) ** 2) + ((y - coords[i][1]) ** 2) < closest[1]:
+                closest = i, ((x - coords[i][0]) ** 2 + (y - coords[i][1]) ** 2)
+        c = sp.nodes[closest[0]-1], coords[closest[0]-1]
 
-p = [Pendulum() for i in range(n)]
-for i in range(n):
-    p[i].add_node(i)
-    p[i].add_node(i)
+    
+    #closest node
+def onmove(event):
+    global c, sp
+    if (c != None):
+        x = event.xdata
+        y = event.ydata
+        c[0][2] = math.pi - math.atan2(x - c[1][0],y - c[1][1])
+        c[0][1] = math.sqrt((y - c[1][1]) ** 2 + (x - c[1][0]) ** 2)
+        
 
-fig, ax = plt.subplots(2,1)
+def fliph(event):
+    global h
+    ax[0].xaxis.set_visible(h)
+    ax[0].yaxis.set_visible(h)
+    h = not h
+
+
+
+p = []
+fig, ax = plt.subplots(5,1)
+cid1 = fig.canvas.mpl_connect('button_press_event', onclick)
+cid2 = fig.canvas.mpl_connect('motion_notify_event', onmove)
+def flips(event):
+    global s,p
+    p = [Pendulum() for i in range(spendulum.val)]
+    fig.delaxes(ax[1])
+    fig.delaxes(ax[2])
+    fig.delaxes(ax[4])
+    fig.canvas.mpl_disconnect(cid1)
+    fig.canvas.mpl_disconnect(cid2)
+    ax[0].set_axis_on()
+    ax[0].xaxis.set_visible(h)
+    ax[0].yaxis.set_visible(h)
+
+    s = not s
+#ax[0] = graph, ax[1] = help button, ax[2] = pendulum slider, ax[3] = start button, ax[4] = node slider
 plt.axis('tight')
-ax[0].set_position([0.1, 0.1, 0.8, 0.8])
-ax[1].set_position([0.1,0.85,0.05,0.05])
+ax[0].set_position([0.08,0.1,0.9,0.85])
+ax[1].set_position([0.08,0.90,0.05,0.05])
+ax[2].set_position([0.15,0.03,0.8,0.02])
+ax[3].set_position([0.88,0.90,0.1,0.05])
+ax[4].set_position([0.15,0.01,0.8,0.02])
+bhelp = Button(ax[1], '?')
+bhelp.on_clicked(fliph)
+bstart = Button(ax[3], 'Start/Stop')
+bstart.on_clicked(flips)
+
+spendulum = Slider(ax[2], "Pendulum(s)", 1, 100, 50, valstep=1, clip_on=False)
+snode = Slider(ax[4], "Node(s)", 1, 10, 2, valstep=1, clip_on=False)
 def animate(i):
-    if h == False:
+    global spendulum, p
+    if s == False:
+        ax[0].cla()
+        if (snode.val < len(sp.nodes)):
+            sp.remove_node()
+        elif (snode.val > len(sp.nodes)):
+            sp.add_node()
+        if h == False:
+            x = [j[0] for j in sp.coords()]
+            y = [j[1] for j in sp.coords()]
+            ax[0].set_xlim(-10,10)
+            ax[0].set_ylim(-10,10)
+            ax[0].plot(x, y, marker="o", markersize=8, color="black")
+        else:
+            ax[0].cla()
+            ax[0].set_axis_off()
+            ax[0].text(0, 0.9, "The pendulum mass and length are only adjustable for a double pendulum.")
+            ax[0].text(0, 0.85, "The slider will appear only when the above condition is satisifed.")
+    else:
         ax[0].cla()
         for i in p:
             i.elapse(0.04)
@@ -81,18 +159,6 @@ def animate(i):
             ax[0].set_xlim(-10,10)
             ax[0].set_ylim(-10,10)
             ax[0].plot(x, y, marker="o", markersize=8)
-    else:
-        ax[0].cla()
-        ax[0].set_axis_off()
-        ax[0].text(0, 0, "Hi")
-
-def flip(event):
-    global h
-    ax[0].xaxis.set_visible(h)
-    ax[0].yaxis.set_visible(h)
-    h = not h
 
 ani = animation.FuncAnimation(fig, animate, interval=10)
-bhelp = Button(ax[1], '?')
-bhelp.on_clicked(flip)
 plt.show()
