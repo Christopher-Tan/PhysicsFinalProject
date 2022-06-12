@@ -24,3 +24,10 @@ While the pendulums for 3 or more nodes don't have as much variability as the do
 ## Run:
 
 To run the program simply double click the .py file, or run `python3 Pendulum.py` from the terminal. To exit the entire program, close the terminal window and not the matplotlib window.
+
+## Contributions from:
+https://www.myphysicslab.com/pendulum/double-pendulum-en.html
+
+https://www.myphysicslab.com/explain/runge-kutta-en.html
+
+https://travisdoesmath.github.io/pendulum-explainer/
