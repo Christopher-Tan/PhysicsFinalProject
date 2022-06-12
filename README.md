@@ -16,8 +16,8 @@ After deciding on the number of pendulums, you can begin the simulation to see t
 On top of the standard double pendulum, we have also included pendulums with up to 10 nodes. The simulation is adjustable and runs in the same way, other than a few key differences.
 
 The key differences:
--Double pendulums have an adjustable mass ratio, the rest do not.
--The lengths of the non-double pendulums are constant. When setting up the initial configuration, they will seem adjustable. However, the lengths will then be scaled back to the initial length with the angles between the nodes left the same. 
+- Double pendulums have an adjustable mass ratio, the rest do not.
+- The lengths of the non-double pendulums are constant. When setting up the initial configuration, they will seem adjustable. However, the lengths will then be scaled back to the initial length with the angles between the nodes left the same. 
 
 While the pendulums for 3 or more nodes don't have as much variability as the double pendulum, it is available if you are interested in seeing what their chaotic motions are like.
 

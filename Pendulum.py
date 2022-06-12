@@ -20,7 +20,6 @@ while True:
     #Constants
     end = False
     g = 10
-    n = 0.04
     def f(array):
         if (len(array) == 2):
             m1 = array[0][0]
@@ -131,7 +130,7 @@ while True:
     s = False
     c = None
     p = []
-    fig, ax = plt.subplots(6,1)
+    fig, ax = plt.subplots(6,1, figsize=(9,7))
     cid1 = fig.canvas.mpl_connect('button_press_event', onclick)
     cid2 = fig.canvas.mpl_connect('motion_notify_event', onmove)
     def flips(event):
@@ -139,7 +138,6 @@ while True:
         s = not s
         h = False
         c = None
-        n *= (2 ** sspeed.val)
         if len(sp.nodes) != 2:
             for i in sp.nodes:
                 i[1] = 1
@@ -155,7 +153,7 @@ while True:
             fig.delaxes(ax[2])
             fig.delaxes(ax[3])
             fig.delaxes(ax[4])
-            fig.delaxes(ax[5])
+            #fig.delaxes(ax[5])
             if snode.val == 2:
                 fig.delaxes(smassax)
             fig.canvas.mpl_disconnect(cid1)
@@ -165,7 +163,7 @@ while True:
             ax[0].yaxis.set_visible(True)
         else:
             end = True
-    #ax[0] = graph, ax[1] = help button, ax[2] = pendulum slider, ax[3] = start button, ax[4] = node slider
+    #ax[0] = graph, ax[1] = help button, ax[2] = pendulum slider, ax[3] = start button, ax[4] = node slider, ax[5] = speed slider
     plt.axis('tight')
     ax[0].set_position([0.08,0.1,0.9,0.85])
     ax[1].set_position([0.08,0.90,0.05,0.05])
@@ -178,12 +176,13 @@ while True:
     bstart = Button(ax[3], 'Start')
     bstart.on_clicked(flips)
 
-    spendulum = Slider(ax[2], "Pendulum(s)", 1, 100, 50, valstep=1, clip_on=False)
+    spendulum = Slider(ax[2], "Pendulum(s)", 1, 100, 10, valstep=1, clip_on=False)
     snode = Slider(ax[4], "Node(s)", 1, 10, 2, valstep=1, clip_on=False)
     smass = None
     sspeed = Slider(ax[5], "Speed", -2, 2, 0, valstep=1, clip_on=False)
     def animate(i):
-        global spendulum, p, smassax, smass
+        global spendulum, p, smassax, smass, sspeed
+        sspeed.valtext.set_text("x " + str(2 ** sspeed.val))
         if s == False:
             ax[0].cla()
             if snode.val == 2 and smass == None:
@@ -197,7 +196,7 @@ while True:
             elif smass != None:
                 fig.delaxes(smassax)
                 smass = None
-            sspeed.valtext.set_text("x " + str(2 ** sspeed.val))
+            
             
             if (snode.val < len(sp.nodes)):
                 sp.remove_node()
@@ -226,8 +225,9 @@ while True:
                 ax[0].text(0, 0.1, "The error also increases if you increase the simulation speed.")
         else:
             ax[0].cla()
+            n = 2 ** sspeed.val
             for i in p:
-                i.elapse(n)
+                i.elapse((0.04 * (n)))
                 x = [j[0] for j in i.coords()]
                 y = [j[1] for j in i.coords()]
                 ax[0].set_xlim(-10,10)
