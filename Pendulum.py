@@ -1,3 +1,12 @@
+import subprocess
+import sys
+
+def install(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+install("numpy")
+install("matplotlib")
+install("scipy")
+install("pandas")
 while True:
     import math
     import time
@@ -214,6 +223,7 @@ while True:
                 ax[0].text(0, 0.25, "Note: the Runge Kutta 4 method has a relatively minimal error compared to Euler's")
                 ax[0].text(0, 0.2, "method, however, over time the error equally builds up and the simulation becomes")
                 ax[0].text(0, 0.15, "less accurate: energy won't be conserved and the pendulum might move incorrectly.")
+                ax[0].text(0, 0.1, "The error also increases if you increase the simulation speed.")
         else:
             ax[0].cla()
             for i in p:
