@@ -11,6 +11,7 @@ while True:
     #Constants
     end = False
     g = 10
+    n = 0.04
     def f(array):
         if (len(array) == 2):
             m1 = array[0][0]
@@ -22,10 +23,6 @@ while True:
             w1 = array[0][3]
             w2 = array[1][3]
             
-            f1 = (-l2 * (m2) * (w2 ** 2) * math.sin(t1 - t2) - g * math.sin(t1)) / l1
-            f2 = (l1 * (w1 ** 2) * math.sin(t1 - t2) - g * math.sin(t2)) / l2
-            a1 = l2 * m2 * math.cos(t1 - t2) / (l1 * (m1 + m2))
-            a2 = l1 * math.cos(t1 - t2) / l2
             return [w1, w2, (-g * (2 * m1 + m2) * math.sin(t1) - m2 * g * math.sin(t1 - 2 * t2) - 2 * math.sin(t1 - t2) * m2 * ((w2 ** 2) * l2 + (w1 ** 2) * l1 * math.cos(t1 - t2))) / (l1 * (2 * m1 + m2 - m2 * math.cos(2 * t1 - 2 * t2))), (2 * math.sin(t1 - t2) * ((w1 ** 2) * l1 * (m1 + m2) + g * (m1 + m2) * math.cos(t1) + (w2 ** 2) * l2 * m2 * math.cos(t1 - t2))) / (l2 * (2 * m1 + m2 - m2 * math.cos(2 * t1 - 2 * t2)))]
         else:
             M = []
@@ -125,14 +122,15 @@ while True:
     s = False
     c = None
     p = []
-    fig, ax = plt.subplots(5,1)
+    fig, ax = plt.subplots(6,1)
     cid1 = fig.canvas.mpl_connect('button_press_event', onclick)
     cid2 = fig.canvas.mpl_connect('motion_notify_event', onmove)
     def flips(event):
-        global s,p,h,counter,spendulum,snode,bhelp,end,smass,smassax
+        global s,p,h,n,counter,spendulum,snode,bhelp,end,smass,smassax,sspeed
         s = not s
         h = False
         c = None
+        n *= (2 ** sspeed.val)
         if len(sp.nodes) != 2:
             for i in sp.nodes:
                 i[1] = 1
@@ -148,7 +146,9 @@ while True:
             fig.delaxes(ax[2])
             fig.delaxes(ax[3])
             fig.delaxes(ax[4])
-            fig.delaxes(smassax)
+            fig.delaxes(ax[5])
+            if snode.val == 2:
+                fig.delaxes(smassax)
             fig.canvas.mpl_disconnect(cid1)
             fig.canvas.mpl_disconnect(cid2)
             ax[0].set_axis_on()
@@ -163,6 +163,7 @@ while True:
     ax[2].set_position([0.15,0.03,0.8,0.02])
     ax[3].set_position([0.88,0.90,0.1,0.05])
     ax[4].set_position([0.15,0.01,0.8,0.02])
+    ax[5].set_position([0.15,0.05,0.8,0.02])
     bhelp = Button(ax[1], '?')
     bhelp.on_clicked(fliph)
     bstart = Button(ax[3], 'Start')
@@ -171,6 +172,7 @@ while True:
     spendulum = Slider(ax[2], "Pendulum(s)", 1, 100, 50, valstep=1, clip_on=False)
     snode = Slider(ax[4], "Node(s)", 1, 10, 2, valstep=1, clip_on=False)
     smass = None
+    sspeed = Slider(ax[5], "Speed", -2, 2, 0, valstep=1, clip_on=False)
     def animate(i):
         global spendulum, p, smassax, smass
         if s == False:
@@ -186,6 +188,7 @@ while True:
             elif smass != None:
                 fig.delaxes(smassax)
                 smass = None
+            sspeed.valtext.set_text("x " + str(2 ** sspeed.val))
             
             if (snode.val < len(sp.nodes)):
                 sp.remove_node()
@@ -214,7 +217,7 @@ while True:
         else:
             ax[0].cla()
             for i in p:
-                i.elapse(0.04)
+                i.elapse(n)
                 x = [j[0] for j in i.coords()]
                 y = [j[1] for j in i.coords()]
                 ax[0].set_xlim(-10,10)
